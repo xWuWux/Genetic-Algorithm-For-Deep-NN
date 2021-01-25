@@ -1,12 +1,14 @@
 from random import seed
 from random import random
 from random import randint
+from random import shuffle
 
 
 MAX_LAYER = 8
 MAX_NEURONS = 128
-POPULATION = 8 #best if dividable by 4
-GENERATIONS = 10
+POPULATION = 40 #need to be dividable by 4
+GENERATIONS = 200
+TARGET_SCORE = 50000
 
 
 def generate_individual():
@@ -26,7 +28,7 @@ def initialize():
 def cost(ind):
     cost = (ind[0]/ind[1]/ind[2]*ind[3]*ind[4]*ind[5]/ind[6]/ind[7])
     # print("Indiv: " + str(ind) + " | Cost: " + str(cost))
-    print("Each of this will take 5 minutes")
+    # print("Each of this will take 5 minutes")
     return cost
 
 
@@ -38,17 +40,29 @@ def sort_and_divide(bag_with_cost):
     return sorted_bag
 
 
-def cross_parents(parent1, parent2):
-    cross_point = randint(1, MAX_LAYER)
-    child1 = []
-    child1.extend(parent1[:cross_point])
-    child1.extend(parent2[cross_point:])
-    child2 = []
-    child2.extend(parent2[:cross_point])
-    child2.extend(parent1[cross_point:])
-    cost(child1)
-    cost(child2)
-    return child1, child2
+def cross_parents(parent1, parent2, cross_point):
+    child = []
+    child.extend(parent1[:cross_point])
+    child.extend(parent2[cross_point:])
+    return child
+
+
+def crossover(pop):
+    random_index_table = []
+
+    for x in range (0, len(pop)):
+        random_index_table.append(x)
+    shuffle(random_index_table)
+    # print(random_index_table)
+
+    for x in range (0, len(pop), 2):
+        p1 = pop[random_index_table[x]][0]
+        p2 = pop[random_index_table[x+1]][0]
+        cross_point = randint(1, MAX_LAYER)
+        pop.append(cross_parents(p1,p2,cross_point))
+        pop.append(cross_parents(p2,p1,cross_point))
+
+    return pop
 
 
 def calculate_missing_cost(population):
@@ -69,35 +83,18 @@ for x in init_pop_bag:
     pop_bag.append([x, cost(x)])
 
 max_score = max(pop_bag, key=lambda x: x[1])[1]
-#sprawdzenie warunku stopu
 
+#here it'll check if max_score is enough
 
-print("Generation 1 ~~ best score = " + str(max_score))
-pop_bag.sort(key=lambda x:x[1])
-for x in pop_bag:
-    print(x)
+for g in range(1, GENERATIONS):
+    print("Generation " + str(g) + " ~~ best score = " + str(max_score))
 
-pop_bag = sort_and_divide(pop_bag)
+    if(max_score) >= TARGET_SCORE: break
 
+    pop_bag = sort_and_divide(pop_bag)
+    pop_bag = crossover(pop_bag)
+    pop_bag = calculate_missing_cost(pop_bag)
 
+    if max_score < max(pop_bag, key=lambda x: x[1])[1]:
+        max_score = max(pop_bag, key=lambda x: x[1])[1]
 
-
-
-
-
-print("xxxxxxxx _gen1_ xxxxxxxxxx")
-for x in pop_bag:
-    print(x)
-
-    # test
-# pop_bag.append([88, 26, 5, 39, 29, 66, 4, 126]) #100.25
-#musimy dobrac randomowo starych, i ich ze sobą zmutować.
-
-
-
-print("xxxxxxxx _gen2_ xxxxxxxxxx")
-
-pop_bag = calculate_missing_cost(pop_bag)
-
-for x in pop_bag:
-    print(x)
