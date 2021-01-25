@@ -16,30 +16,12 @@ def cross_parents(parent1, parent2):
     print(child)
     return child
 
-
-hidden_units = [8,40,50,50,30,20,20,10,8]
-hidden_units2 = [3,1,1,1,1,1,1,1,1]
-
-
-
-[3][12,12,12,12,24,424,412]
-
-
-layers = 8;
 hidden_units = [40,50,50,30,20,20,10,8]
-
-
-print(len(hidden_units))
-
-8,13,123,213,23,23,
-1,12
-
+hidden_units2 = [1,1,1,1,1,1,1,1]
 
 
 for x in range (0,20):
     cross_parents(hidden_units2, hidden_units)
-
-
 
 
 def siecNeuronowa(hidden_units):
