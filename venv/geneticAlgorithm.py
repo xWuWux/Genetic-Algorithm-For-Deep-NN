@@ -104,7 +104,7 @@ def mutate(pop):
 if __name__ == "__main__":
     # creates the initial randomized population bag:
     init_pop_bag = initialize()
-    # init_pop_bag=[[2,1,1,1,1,1,1,1],[1,1,1,1,1,1,2,1],[1,1,1,1,1,1,2,1],[1,1,1,1,1,2,1,1],[1,1,1,1,1,1,1,1],[1,2,1,1,1,1,1,1],[1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1]]
+    # init_pop_bag = [[2,1,1,1,1,1,1,1],[1,1,1,1,1,1,2,1],[1,1,1,1,1,1,2,1],[1,1,1,1,1,2,1,1],[1,1,1,1,1,1,1,1],[1,2,1,1,1,1,1,1],[1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1]]
     pop_bag = []
 
     # initial pop go through neural network and setting the score:
