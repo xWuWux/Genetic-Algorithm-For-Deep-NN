@@ -3,16 +3,17 @@ from random import randint
 from random import shuffle
 
 
-# Length of table, how many layers would neural network have
+# Length of table, how many layers would neural network have (min. 2)
+MIN_LAYER = 2
 MAX_LAYER = 8
 # Max value of element in table, max neurons in each layer
 MAX_NEURONS = 128
-# Population of individuals. !!! Needs to be dividable by 4
-POPULATION = 240
+# Population of individuals, needs to be dividable by 4.
+POPULATION = 200
 # How many iterations will the algorithm go through
-GENERATIONS = 50
+GENERATIONS = 100
 # Target score, after it's accomplished algorithm stops
-TARGET_SCORE = 1000000
+TARGET_SCORE = 5000
 # Mutation chance - it's applied to each individual in each generation
 MUTATION_CHANCE = 0.05
 # Number of generations without change in score after the algorithm will stop
@@ -21,7 +22,8 @@ NO_EVOLVE_GENS = 15
 
 def generate_individual():
     new_ind = []
-    for n in range(0, MAX_LAYER):
+    layers = randint(MIN_LAYER, MAX_LAYER)
+    for n in range(0, layers):
         new_ind.append(randint(1, MAX_NEURONS))
     return new_ind
 
@@ -34,7 +36,7 @@ def initialize():
 
 
 def cost(ind):
-    c = (ind[0]/ind[1]/ind[2]*ind[3]*ind[4]*ind[5]/ind[6]/ind[7])
+    c = (ind[0]*ind[-1])
     return c
 
 
@@ -80,7 +82,8 @@ def crossover(pop):
     for x in range(0, len(pop), 2):
         p1 = pop[random_index_table[x]][0]
         p2 = pop[random_index_table[x+1]][0]
-        cross_point = randint(1, MAX_LAYER)
+        max_cross_point = min(len(p1), len(p2)) - 1
+        cross_point = randint(1, max_cross_point)
         pop.append(cross_parents(p1, p2, cross_point))
         pop.append(cross_parents(p2, p1, cross_point))
     return pop
@@ -89,9 +92,9 @@ def crossover(pop):
 def calculate_missing_cost(pop):
     pop_with_scores = []
     for ind in pop:
-        if len(ind) == 2 and len(ind[0]) == MAX_LAYER:
+        if isinstance(ind[0], list):
             pop_with_scores.append(ind)
-        elif len(ind) == MAX_LAYER:
+        else:
             pop_with_scores.append([ind, cost(ind)])
     return pop_with_scores
 
@@ -120,7 +123,7 @@ def final_text(pop, stop):
         print(f"#{n + 1}: {pop[n][0]}; \tscore: {round(pop[n][1], 2)}")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and MIN_LAYER >= 2 and POPULATION % 4 == 0:
     stop_condition = ""
     pop_bag = []
 
@@ -172,5 +175,8 @@ if __name__ == "__main__":
         score_table.append(best_of_gen)
 
     final_text(pop_bag, stop_condition)
+
+else:
+    print("Please correct POPULATION or MIN_LAYER")
 
 
