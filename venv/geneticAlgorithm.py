@@ -6,9 +6,9 @@ from random import shuffle
 
 MAX_LAYER = 8
 MAX_NEURONS = 128
-POPULATION = 40 #need to be dividable by 4
-GENERATIONS = 200
-TARGET_SCORE = 50000
+POPULATION = 240 #needs to be dividable by 4
+GENERATIONS = 50
+TARGET_SCORE = 1000000
 MUTATION_CHANCE = 0.05
 
 
@@ -28,7 +28,6 @@ def initialize():
 
 def cost(ind):
     cost = (ind[0]/ind[1]/ind[2]*ind[3]*ind[4]*ind[5]/ind[6]/ind[7])
-    # print("Each of this will take 5 minutes")
     return cost
 
 
@@ -38,6 +37,23 @@ def sort_and_divide(bag_with_cost):
     for x in range(len(bag_with_cost)//2, len(bag_with_cost)):
         sorted_bag.append(bag_with_cost[x])
     return sorted_bag
+
+
+def roulette(pop_with_cost):
+    cost_sum = sum(n for _, n in pop_with_cost)
+    cost_table = []
+    for ind in pop_with_cost:
+        cost_table.append(ind[1])
+    rel_cost = [cost / cost_sum for cost in cost_table]
+    probability = [sum(rel_cost[:i + 1]) for i in range(len(rel_cost))]
+    new_pop = []
+    for n in range(POPULATION//2):
+        r = random()
+        for (i, individual) in enumerate(pop_with_cost):
+            if r <= probability[i]:
+                new_pop.append(individual)
+                break
+    return new_pop
 
 
 def cross_parents(parent1, parent2, cross_point):
@@ -80,7 +96,6 @@ def mutate(pop):
         rand = random()
         if (rand <= MUTATION_CHANCE):
             mutated_pop.append(generate_individual())
-            print("MUTEK")
         else:
             mutated_pop.append(ind)
     return mutated_pop
@@ -98,25 +113,28 @@ if __name__ == "__main__":
     best_of_gen = max(pop_bag, key=lambda x: x[1])[1]
     max_score = best_of_gen
 
-    #loop that goes through rest of generations:
-    for g in range(1, GENERATIONS):
+    # loop that goes through rest of generations:
+    for g in range(1, GENERATIONS+1):
 
-        #checks if generations maximum was better that top score
+        # checks if generations maximum was better that top score
         if max_score < best_of_gen: max_score = best_of_gen
         print("Generation " + str(g) + " ~~ best score = " + str(round(best_of_gen,2)))
 
-        #stop condtiion check
+        # stop condtiion check
         if(max_score) >= TARGET_SCORE:
-            print("Target of score = " + str(TARGET_SCORE) + " was accomplished.")
+            print("Target of score of " + str(TARGET_SCORE) + " was accomplished.")
             break
 
-        #sorting the list and getting top 50%
-        pop_bag = sort_and_divide(pop_bag)
-        #crossover of randomly selected parents
+        # sorting the list
+        # >taking top 50% to next generation (much slower)
+        # pop_bag = sort_and_divide(pop_bag)
+        # >roulette method
+        pop_bag = roulette(pop_bag)
+        # crossover of randomly selected parents
         pop_bag = crossover(pop_bag)
-        #mutating
+        # mutating
         pop_bag = mutate(pop_bag)
-        #calculating score for new children and mutated ones
+        # calculating score for new children and mutated ones
         pop_bag = calculate_missing_cost(pop_bag)
-        #getting best score of generation
+        # getting best score of generation
         best_of_gen = max(pop_bag, key=lambda x: x[1])[1]
