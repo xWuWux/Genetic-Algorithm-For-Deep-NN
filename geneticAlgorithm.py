@@ -3,12 +3,20 @@ from random import randint
 from random import shuffle
 
 
+# Length of table, how many layers would neural network have
 MAX_LAYER = 8
+# Max value of element in table, max neurons in each layer
 MAX_NEURONS = 128
-POPULATION = 240  # needs to be dividable by 4
+# Population of individuals. !!! Needs to be dividable by 4
+POPULATION = 240
+# How many iterations will the algorithm go through
 GENERATIONS = 50
+# Target score, after it's accomplished algorithm stops
 TARGET_SCORE = 1000000
+# Mutation chance - it's applied to each individual in each generation
 MUTATION_CHANCE = 0.05
+# Number of generations without change in score after the algorithm will stop
+NO_EVOLVE_GENS = 15
 
 
 def generate_individual():
@@ -30,12 +38,9 @@ def cost(ind):
     return c
 
 
-def sort_and_divide(pop_with_cost):
-    sorted_pop = []
+def sort(pop_with_cost):
     pop_with_cost.sort(key=lambda x: x[1])
-    for n in range(len(pop_with_cost) // 2, len(pop_with_cost)):
-        sorted_pop.append(pop_with_cost[n])
-    return sorted_pop
+    return pop_with_cost
 
 
 def roulette(pop_with_cost):
@@ -68,7 +73,7 @@ def cross_parents(parent1, parent2, cross_point):
 def crossover(pop):
     random_index_table = []
 
-    for x in range (0, len(pop)):
+    for x in range(0, len(pop)):
         random_index_table.append(x)
     shuffle(random_index_table)
 
@@ -102,41 +107,70 @@ def mutate(pop):
     return mutated_pop
 
 
+def final_text(pop, stop):
+    if stop == "success":
+        print(f"SUCCESS: Target of score of {TARGET_SCORE} was accomplished.")
+    elif stop == "stagnation":
+        print(f"FAILED: Population stopped evolving.")
+    else:
+        print("FAILED: Target was not accomplished.")
+    pop.sort(key=lambda x: x[1], reverse=True)
+    print("Top 5 scores: ")
+    for n in range(0, 5):
+        print(f"#{n + 1}: {pop[n][0]}; \tscore: {round(pop[n][1], 2)}")
+
+
 if __name__ == "__main__":
+    stop_condition = ""
+    pop_bag = []
+
     # creates the initial randomized population bag:
     init_pop_bag = initialize()
-    pop_bag = []
 
     # initial pop go through neural network and setting the score:
     for init_ind in init_pop_bag:
         pop_bag.append([init_ind, cost(init_ind)])
+
+    # creates places to gather scores
     best_of_gen = max(pop_bag, key=lambda x: x[1])[1]
     max_score = best_of_gen
+    score_table = [best_of_gen]
 
     # loop that goes through rest of generations:
-    for g in range(1, GENERATIONS+1):
+    for gen in range(0, GENERATIONS):
 
         # checks if generations maximum was better that top score
-        if max_score < best_of_gen:
+        if max_score <= best_of_gen:
             max_score = best_of_gen
 
-        print("Generation " + str(g) + " ~~ best score = " + str(round(best_of_gen,2)))
+        print(f"Generation {gen + 1} ~~ best score = {round(best_of_gen, 2)}")
 
         # stop condition check
         if max_score >= TARGET_SCORE:
-            print("Target of score of " + str(TARGET_SCORE) + " was accomplished.")
+            stop_condition = "success"
             break
 
-        # sorting the list
-        # #1 taking top 50% to next generation (much slower)
-        # pop_bag = sort_and_divide(pop_bag)
-        # #2 roulette method
+        # checks if the population stopped evolving
+        if score_table[-NO_EVOLVE_GENS:].count(score_table[-1]) >= NO_EVOLVE_GENS:
+            stop_condition = "stagnation"
+            break
+
+        # choosing new population based on roulette
         pop_bag = roulette(pop_bag)
+
         # crossover of randomly selected parents
         pop_bag = crossover(pop_bag)
+
         # mutating
         pop_bag = mutate(pop_bag)
+
         # calculating score for new children and mutated ones
         pop_bag = calculate_missing_cost(pop_bag)
+
         # getting best score of generation
         best_of_gen = max(pop_bag, key=lambda x: x[1])[1]
+        score_table.append(best_of_gen)
+
+    final_text(pop_bag, stop_condition)
+
+
