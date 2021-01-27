@@ -2,10 +2,9 @@ from random import random
 from random import randint
 from random import shuffle
 
-
 # Length of table, how many layers would neural network have (min. 2)
 MIN_LAYER = 2
-MAX_LAYER = 8
+MAX_LAYER = 12
 # Max value of element in table, max neurons in each layer
 MAX_NEURONS = 128
 # Population of individuals, needs to be dividable by 4.
@@ -13,11 +12,11 @@ POPULATION = 200
 # How many iterations will the algorithm go through
 GENERATIONS = 100
 # Target score, after it's accomplished algorithm stops
-TARGET_SCORE = 5000
+TARGET_SCORE = 5000000
 # Mutation chance - it's applied to each individual in each generation
 MUTATION_CHANCE = 0.05
 # Number of generations without change in score after the algorithm will stop
-NO_EVOLVE_GENS = 15
+NO_EVOLVE_GENS = 25
 
 
 def generate_individual():
@@ -36,7 +35,7 @@ def initialize():
 
 
 def cost(ind):
-    c = (ind[0]*ind[-1])
+    c = (ind[0] * ind[-1])
     return c
 
 
@@ -56,7 +55,7 @@ def roulette(pop_with_cost):
     probability = [sum(rel_cost[:i + 1]) for i in range(len(rel_cost))]
 
     new_pop = []
-    for n in range(POPULATION//2):
+    for n in range(POPULATION // 2):
         r = random()
         for (i, individual) in enumerate(pop_with_cost):
             if r <= probability[i]:
@@ -81,7 +80,7 @@ def crossover(pop):
 
     for x in range(0, len(pop), 2):
         p1 = pop[random_index_table[x]][0]
-        p2 = pop[random_index_table[x+1]][0]
+        p2 = pop[random_index_table[x + 1]][0]
         max_cross_point = min(len(p1), len(p2)) - 1
         cross_point = randint(1, max_cross_point)
         pop.append(cross_parents(p1, p2, cross_point))
@@ -104,27 +103,49 @@ def mutate(pop):
     for ind in pop:
         rand = random()
         if rand <= MUTATION_CHANCE:
-            mutated_pop.append(generate_individual())
+            rand2 = randint(0, 100)
+            mut_value = 1 if rand2 % 2 == 0 else -1
+            if isinstance(ind[0], list):  # individual has cost:
+                target_cell = randint(0, len(ind[0]) - 1)
+                new_value = ind[0][target_cell] + mut_value
+                new_value = 1 if new_value > MAX_NEURONS else new_value
+                new_value = MAX_NEURONS if new_value == 0 else new_value
+                ind[0][target_cell] = new_value
+                mutated_pop.append(ind[0])  # so the cost function will be cleared
+            else:
+                target_cell = randint(0, len(ind) - 1)
+                new_value = ind[target_cell] + mut_value
+                new_value = 1 if new_value > MAX_NEURONS else new_value
+                new_value = MAX_NEURONS if new_value == 0 else new_value
+                ind[target_cell] = new_value
+                mutated_pop.append(ind)
         else:
             mutated_pop.append(ind)
     return mutated_pop
 
 
-def final_text(pop, stop):
+def gather_text(pop, g, best, text):
+    pop.sort(key=lambda x: x[1], reverse=True)
+    text = text + f"Generation {g + 1} ~~ best score = {round(best, 2)}\n"
+    print(f"Generation {g + 1} ~~ best score = {round(best, 2)}")
+    for n in range(0, 5):
+        text = text + f"#{n + 1}: {pop[n][0]}; \tscore: {round(pop[n][1], 2)}\n"
+    return text
+
+
+def final_text(stop, text):
+    print(text)
     if stop == "success":
         print(f"SUCCESS: Target of score of {TARGET_SCORE} was accomplished.")
     elif stop == "stagnation":
         print(f"FAILED: Population stopped evolving.")
     else:
         print("FAILED: Target was not accomplished.")
-    pop.sort(key=lambda x: x[1], reverse=True)
-    print("Top 5 scores: ")
-    for n in range(0, 5):
-        print(f"#{n + 1}: {pop[n][0]}; \tscore: {round(pop[n][1], 2)}")
 
 
 if __name__ == "__main__" and MIN_LAYER >= 2 and POPULATION % 4 == 0:
     stop_condition = ""
+    text_summary = ""
     pop_bag = []
 
     # creates the initial randomized population bag:
@@ -142,11 +163,11 @@ if __name__ == "__main__" and MIN_LAYER >= 2 and POPULATION % 4 == 0:
     # loop that goes through rest of generations:
     for gen in range(0, GENERATIONS):
 
+        text_summary = gather_text(pop_bag, gen, best_of_gen, text_summary)
+
         # checks if generations maximum was better that top score
         if max_score <= best_of_gen:
             max_score = best_of_gen
-
-        print(f"Generation {gen + 1} ~~ best score = {round(best_of_gen, 2)}")
 
         # stop condition check
         if max_score >= TARGET_SCORE:
@@ -174,7 +195,7 @@ if __name__ == "__main__" and MIN_LAYER >= 2 and POPULATION % 4 == 0:
         best_of_gen = max(pop_bag, key=lambda x: x[1])[1]
         score_table.append(best_of_gen)
 
-    final_text(pop_bag, stop_condition)
+    final_text(pop_bag, text_summary)
 
 else:
     print("Please correct POPULATION or MIN_LAYER")
