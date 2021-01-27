@@ -8,11 +8,11 @@ MAX_LAYER = 12
 # Max value of element in table, max neurons in each layer
 MAX_NEURONS = 128
 # Population of individuals, needs to be dividable by 4.
-POPULATION = 200
+POPULATION = 76
 # How many iterations will the algorithm go through
-GENERATIONS = 100
+GENERATIONS = 10
 # Target score, after it's accomplished algorithm stops
-TARGET_SCORE = 5000000
+TARGET_SCORE = 500000
 # Mutation chance - it's applied to each individual in each generation
 MUTATION_CHANCE = 0.05
 # Number of generations without change in score after the algorithm will stop
@@ -35,7 +35,8 @@ def initialize():
 
 
 def cost(ind):
-    c = (ind[0] * ind[-1])
+    c = (ind[0] * ind[1] / ind[-2] + ind[-1]*8)
+    # it will generate cost based on genetic algorithm
     return c
 
 
@@ -126,10 +127,10 @@ def mutate(pop):
 
 def gather_text(pop, g, best, text):
     pop.sort(key=lambda x: x[1], reverse=True)
-    text = text + f"Generation {g + 1} ~~ best score = {round(best, 2)}\n"
-    print(f"Generation {g + 1} ~~ best score = {round(best, 2)}")
+    t = f"Generation {g + 1} ~~ best score = {round(best, 2)}\n"
     for n in range(0, 5):
-        text = text + f"#{n + 1}: {pop[n][0]}; \tscore: {round(pop[n][1], 2)}\n"
+        text = f"#{5 - n}: {pop[4-n][0]}; \tscore: {round(pop[4-n][1], 2)}\n" + text
+    text = t + text + t
     return text
 
 
