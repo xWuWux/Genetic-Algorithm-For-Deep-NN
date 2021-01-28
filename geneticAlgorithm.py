@@ -196,7 +196,7 @@ if __name__ == "__main__" and MIN_LAYER >= 2 and POPULATION % 4 == 0:
         best_of_gen = max(pop_bag, key=lambda x: x[1])[1]
         score_table.append(best_of_gen)
 
-    final_text(pop_bag, text_summary)
+    final_text(stop_condition, text_summary)
 
 else:
     print("Please correct POPULATION or MIN_LAYER")
