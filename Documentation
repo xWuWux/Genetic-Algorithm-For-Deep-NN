@@ -1,0 +1,57 @@
+Documentation
+Overview
+This code is designed to evolve neural network architectures using a genetic algorithm. The goal is to find the best architecture for classifying the Iris dataset, which is a popular dataset for machine learning.
+
+Dependencies
+TensorFlow: Used for building and training the neural network.
+Pandas: Used for data manipulation and analysis.
+random: Used for generating random numbers.
+Constants
+MIN_LAYER, MAX_LAYER: Define the minimum and maximum number of layers the neural network can have.
+MAX_NEURONS: The maximum number of neurons in each layer.
+POPULATION: The number of individuals in the population. It should be divisible by 4.
+GENERATIONS: The number of iterations the algorithm will go through.
+TARGET_SCORE: The desired accuracy score. If achieved, the algorithm stops.
+MUTATION_CHANCE: The probability of mutation for each individual in each generation.
+NO_EVOLVE_GENS: The number of generations without improvement in score after which the algorithm will stop.
+CSV_COLUMN_NAMES, SPECIES: Constants related to the Iris dataset.
+Functions
+generate_individual(): Generates a random individual, which represents a neural network architecture.
+
+initialize(): Initializes the population with random individuals.
+
+cost(ind): Evaluates the performance of an individual by training a neural network with the architecture represented by the individual and returning its accuracy.
+
+sort(pop_with_cost): Sorts the population based on their scores.
+
+roulette(pop_with_cost): Implements roulette wheel selection to select individuals based on their fitness.
+
+cross_parents(parent1, parent2, cross_point): Performs crossover between two parents to produce a child.
+
+crossover(pop): Applies crossover to the population.
+
+calculate_missing_cost(pop): Calculates the scores for individuals that don't have them.
+
+mutate(pop): Applies mutation to the population.
+
+gather_text(pop, g, best, text): Gathers text for logging purposes.
+
+final_text(stop, text): Prints the final results and reasons for stopping.
+
+input_fn(features, labels, training=True, batch_size=256): A utility function for TensorFlow to read the dataset.
+
+DNN(population_for_DNN): Builds and trains a deep neural network based on the architecture represented by an individual. Returns the accuracy of the model.
+
+Main Execution
+The main execution (if __name__ == "__main__" ...) does the following:
+
+Downloads the Iris dataset and loads it into pandas dataframes.
+Initializes the population.
+Trains a neural network for each individual in the population and assigns a score.
+Iterates through generations, applying selection, crossover, and mutation.
+Checks for stopping conditions: if the target score is achieved, if the population stops evolving, or if the maximum number of generations is reached.
+Prints the final results.
+Notes
+The code uses TensorFlow's Estimator API to build and train the neural network.
+The genetic algorithm uses roulette wheel selection, one-point crossover, and mutation to evolve the population.
+The architecture of the neural network is represented as a list of integers, where each integer represents the number of neurons in a layer.
